@@ -54,17 +54,17 @@ fun Greeting(
     // need check if permission aren't granted
     // Camera Controller
     // ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-    var perms = viewModel.permissionGranted.collectAsState()
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val cameraPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
     val permission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { res -> viewModel.allowCameraPermission() }
+        onResult = { res -> println(res) }
     )
     LaunchedEffect(lifecycleOwner) {
         viewModel.bindToCamera(context.applicationContext, lifecycleOwner)
     }
-    if (perms.value) {
+    if (cameraPermission == PackageManager.PERMISSION_GRANTED) {
         surfaceRequest?.let { request ->
             CameraXViewfinder(
                 surfaceRequest = request,

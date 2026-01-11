@@ -17,17 +17,11 @@ import kotlinx.coroutines.flow.update
 class GreetingViewModel : ViewModel() {
     private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest.asStateFlow()
-
-    private val _permissionGranted = MutableStateFlow(false)
-    var permissionGranted: StateFlow<Boolean> = _permissionGranted.asStateFlow()
     private val cameraPreviewUseCase = Preview.Builder().build().apply {
         setSurfaceProvider { newSurfaceRequest ->
             _surfaceRequest.update { newSurfaceRequest
             }
         }
-    }
-    fun allowCameraPermission() {
-        _permissionGranted.value = true
     }
 
     suspend fun bindToCamera(appContext: Context, lifecycleOwner: LifecycleOwner) {
