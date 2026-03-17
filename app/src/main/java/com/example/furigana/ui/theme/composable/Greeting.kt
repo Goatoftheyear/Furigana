@@ -1,47 +1,33 @@
 package com.example.furigana.ui.theme.composable
 
 import android.Manifest
-import android.os.Bundle
-import android.util.Log
-import android.view.Surface
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.compose.CameraXViewfinder
-import androidx.camera.core.CameraControl
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.lifecycle.awaitInstance
-import androidx.camera.view.PreviewView
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.ImageProxy
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.furigana.ui.theme.viewmodel.GreetingViewModel
-import com.google.common.util.concurrent.ListenableFuture
-import org.intellij.lang.annotations.JdkConstants
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 
 @Composable
 fun Greeting(
@@ -61,6 +47,8 @@ fun Greeting(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { res -> println(res) }
     )
+    var bitMapInMemory: Bitmap
+    val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
     LaunchedEffect(lifecycleOwner) {
         viewModel.bindToCamera(context.applicationContext, lifecycleOwner)
     }
@@ -70,26 +58,53 @@ fun Greeting(
                 surfaceRequest = request,
                 modifier = modifier
             )
-            Button(
-                onClick = {
-                    permission.launch(Manifest.permission.CAMERA)
-                }
+            Column(
+                verticalArrangement = Arrangement.Center,
+                modifier = modifier.fillMaxSize()
             ) {
-                Text(
-                    text = "Hmmage",
-                    textAlign = TextAlign.Center
-                )
+                Button(
+                    onClick = {
+                        viewModel.imageCapture.takePicture(
+                            ContextCompat.getMainExecutor(context),
+                            object : ImageCapture.OnImageCapturedCallback() {
+                                override fun onError(exception: ImageCaptureException) {
+                                    super.onError(exception)
+                                    println("error here")
+                                }
+
+                                override fun onCaptureSuccess(image: ImageProxy) {
+                                    super.onCaptureSuccess(image)
+                                    bitMapInMemory = image.toBitmap()
+                                    println("toire")
+                                    recognizer.process(bitMapInMemory, 0)
+                                        .addOnSuccessListener { text ->
+                                            val ans = text.textBlocks
+                                            for (line in ans) {
+                                                val lineText = line.text
+                                                println(lineText)
+                                                val tokens = tokenizer.tokenize(lineText)
+                                                }
+                                            }
+                                        }
+                                }
+                            }
+                        )
+                    }
+                ) {
+                    Text(
+                        text = "Hmmage",
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     } else {
-        Box(Modifier.fillMaxSize(),
-            Alignment.Center) {
-            Column(verticalArrangement = Arrangement.Center) {
+            Column(verticalArrangement = Arrangement.Center,
+            modifier = modifier.fillMaxSize()) {
                 Text(
                     text = "Camera is required to use this app",
                     textAlign = TextAlign.Center
                 )
-            Row(horizontalArrangement = Arrangement.Center) {
                     Button(
                         onClick = {
                             permission.launch(Manifest.permission.CAMERA)
@@ -100,8 +115,6 @@ fun Greeting(
                             textAlign = TextAlign.Center
                         )
                     }
-                }
             }
-        }
     }
 }
