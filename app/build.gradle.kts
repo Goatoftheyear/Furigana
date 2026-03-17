@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -37,9 +38,22 @@ android {
     buildFeatures {
         compose = true
     }
+
 }
 
+
 dependencies {
+    android {
+        packaging  {
+            resources {
+                pickFirsts.add("META-INF/CONTRIBUTORS.md")
+                pickFirsts.add("META-INF/NOTICE.md")
+                pickFirsts.add("META-INF/LICENSE.md")
+            }
+        }
+    }
+    implementation(libs.kuromoji.ipadic)
+    implementation(libs.kuromoji.core)
     implementation(libs.camera.compose)
     implementation(libs.androidx.camera.extensions)
     implementation(libs.androidx.camera.mlkit.vision)

@@ -25,6 +25,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.atilika.kuromoji.ipadic.Tokenizer
 import com.example.furigana.ui.theme.viewmodel.GreetingViewModel
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
@@ -47,6 +48,11 @@ fun Greeting(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { res -> println(res) }
     )
+    val tokenizer = Tokenizer()
+    val tokens = tokenizer.tokenize("お寿司が食べたい。")
+    for (token in tokens) {
+        println(token.getSurface() + "\t" + token.getAllFeatures())
+    }
     var bitMapInMemory: Bitmap
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
     LaunchedEffect(lifecycleOwner) {
@@ -83,6 +89,8 @@ fun Greeting(
                                                 val lineText = line.text
                                                 println(lineText)
                                                 val tokens = tokenizer.tokenize(lineText)
+                                                for (token in tokens) {
+                                                    println(token.getSurface() + "\t" + token.getAllFeatures())
                                                 }
                                             }
                                         }
