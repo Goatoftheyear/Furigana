@@ -24,11 +24,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            FuriganaTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                FuriganaTheme {
+                    Greeting(Modifier.padding(innerPadding))
                 }
             }
         }

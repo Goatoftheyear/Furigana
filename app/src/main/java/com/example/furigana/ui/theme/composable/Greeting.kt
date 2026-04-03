@@ -62,11 +62,11 @@ fun Greeting(
         surfaceRequest?.let { request ->
             CameraXViewfinder(
                 surfaceRequest = request,
-                modifier = modifier
+                modifier = Modifier.fillMaxSize()
             )
             Column(
                 verticalArrangement = Arrangement.Center,
-                modifier = modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 Button(
                     onClick = {
@@ -108,7 +108,7 @@ fun Greeting(
         }
     } else {
             Column(verticalArrangement = Arrangement.Center,
-            modifier = modifier.fillMaxSize()) {
+            modifier = Modifier.fillMaxSize()) {
                 Text(
                     text = "Camera is required to use this app",
                     textAlign = TextAlign.Center
