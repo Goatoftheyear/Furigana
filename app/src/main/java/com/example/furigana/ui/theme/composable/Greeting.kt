@@ -208,15 +208,18 @@ fun Greeting(
                                     println("error here")
                                 }
 
-//                                @OptIn(ExperimentalGetImage::class)
                                 override fun onCaptureSuccess(image: ImageProxy) {
-                                    println("test")
-                                    println("${image.imageInfo.rotationDegrees}")
                                     taken.value = true
+                                    val bitmapImage = image.toBitmap()
                                     super.onCaptureSuccess(image)
-                                    ContextCompat.getMainExecutor(context).execute {
-                                        bitMapInMemory.value = image.toBitmap()
-                                    }
+
+                                        val matrix = Matrix().apply {
+                                            postRotate(image.imageInfo.rotationDegrees.toFloat())
+                                        }
+                                                bitMapInMemory.value = Bitmap.createBitmap(
+                                                    bitmapImage, 0, 0, bitmapImage.width,
+                                                    bitmapImage.height, matrix, true
+                                                )
 //                                    viewModel.imageAnalyzer.setAnalyzer(executor) { analysisImage ->
 //                                        image.image?.let {
 //                                                image ->
@@ -254,7 +257,7 @@ fun Greeting(
 //                                    }
 //                                    bitMapInMemory.value = image.toBitmap()
 //                                    recognizer.process(bitMapInMemory.value, 0)
-                                    recognizer.process(InputImage.fromBitmap(image.toBitmap(), 0))
+                                    recognizer.process(InputImage.fromBitmap(bitMapInMemory.value, 0))
                                         .addOnSuccessListener { text ->
 
                                             val ans = text.textBlocks
