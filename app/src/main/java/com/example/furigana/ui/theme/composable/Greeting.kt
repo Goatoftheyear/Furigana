@@ -64,8 +64,9 @@ import java.util.concurrent.Executors
 @Composable
 fun Greeting(
     modifier: Modifier = Modifier,
+    onNavigateResult: () -> Boolean,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    viewModel: GreetingViewModel = viewModel()
+    viewModel: GreetingViewModel = viewModel(),
 ) {
     // Preview shows the camera be4 taking
     // preview is just a canvas, need sth to paint on it
