@@ -6,8 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.Point
 import android.graphics.Rect
-import android.view.OrientationEventListener
-import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.compose.CameraXViewfinder
@@ -27,11 +25,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-//import android.graphics.Path
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.asImageBitmap
@@ -88,28 +84,10 @@ fun Greeting(
     )
     val tokenizer = Tokenizer()
 
-//    val tokens = tokenizer.tokenize("お寿司が食べたい。")
-//    for (token in tokens) {
-//        println(token.getSurface() + "\t" + token.getAllFeatures())
-//    }
-    val executor = remember { Executors.newSingleThreadExecutor() }
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
-    var imageProxy:ImageProxy
-    val boxState = viewModel.box.collectAsState()
+
     val pathState = viewModel.path.collectAsState()
 
-//    var path = Path().apply {
-//        box.value.mapIndexed { index, point ->
-//                if (index == 0) {
-//                    println("move ${point.x} ${point.y}")
-//                    moveTo( point.x.toFloat(),  point.y.toFloat())
-//                } else {
-//                    println("line ${point.x} ${point.y}")
-//                    lineTo(point.x.toFloat(), point.y.toFloat())
-//                }
-//        }
-//        close()
-//    }
 //    DisposableEffect(Unit) {
 //        val orientationEventListener =
 //            object : OrientationEventListener(context) {
@@ -204,43 +182,6 @@ fun Greeting(
                                         bitmapImage, 0, 0, bitmapImage.width,
                                         bitmapImage.height, matrix, true
                                     ))
-//                                    viewModel.imageAnalyzer.setAnalyzer(executor) { analysisImage ->
-//                                        image.image?.let {
-//                                                image ->
-//                                            println("test image rotation ${analysisImage.imageInfo.rotationDegrees}")
-//                                            val img = InputImage.fromMediaImage(
-//                                                image,
-//                                                analysisImage.imageInfo.rotationDegrees
-//                                            )
-//                                            recognizer.process(img).addOnSuccessListener {
-//                                                text ->
-//                                                pathState.value = Path().apply {
-//                                                    box.value.mapIndexed { index, point ->
-//                                                        if (index == 0) {
-////                                                            println("move ${point.x} ${point.y}")
-//                                                            moveTo( point.x.toFloat()/2,  point.y.toFloat()/2)
-//                                                        } else {
-//                                                            lineTo(point.x.toFloat()/2, point.y.toFloat()/2)
-//                                                        }
-//                                                    }
-//                                                    close()
-//                                                }
-//                                                val ans = text.textBlocks
-//                                                for (line in ans) {
-//                                                    println("test cornerPoints ${line.cornerPoints}")
-//                                                    println("test boundingBox${line.boundingBox}")
-//
-//                                                    println("test top ${line.boundingBox?.top}")
-//                                                    println("test bottom ${line.boundingBox?.bottom}")
-//                                                    println("test left ${line.boundingBox?.left}")
-//                                                    println("test right ${line.boundingBox?.right}")
-//                                                }
-//                                                analysisImage.close()
-//                                            }
-//                                        }
-//                                    }
-//                                    bitMapInMemory.value = image.toBitmap()
-//                                    recognizer.process(bitMapInMemory.value, 0)
                                     recognizer.process(InputImage.fromBitmap(bitMapInMemory.value, 0))
                                         .addOnSuccessListener { text ->
                                             val ans = text.textBlocks
@@ -292,11 +233,6 @@ fun Greeting(
                                                     close()
                                                 }
                                                 paths.add(path)
-//                                                val mutableBitMap = image.toBitmap().copy(Bitmap.Config.ARGB_8888, true)
-//                                                val canvas = Canvas(mutableBitMap)
-//                                                canvas.drawPath(path, Paint().apply {
-//                                                    color = android.graphics.Color.RED
-//                                                })
                                                 val lineText = line.text
                                                 println(lineText)
                                                 val tokens = tokenizer.tokenize(lineText)
