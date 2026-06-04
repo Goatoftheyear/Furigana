@@ -3,8 +3,6 @@ package com.example.furigana.ui.theme.composable
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.Matrix
 import android.graphics.Point
 import android.graphics.Rect
@@ -12,9 +10,7 @@ import android.view.OrientationEventListener
 import android.view.Surface
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.OptIn
 import androidx.camera.compose.CameraXViewfinder
-import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
@@ -33,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 //import android.graphics.Path
@@ -47,7 +42,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -57,7 +51,6 @@ import com.atilika.kuromoji.ipadic.Tokenizer
 import com.example.furigana.ui.theme.viewmodel.GreetingViewModel
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
-import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.core.graphics.createBitmap
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
@@ -104,6 +97,7 @@ fun Greeting(
     var imageProxy:ImageProxy
     val boxState = viewModel.box.collectAsState()
     val pathState = viewModel.path.collectAsState()
+
 //    var path = Path().apply {
 //        box.value.mapIndexed { index, point ->
 //                if (index == 0) {
@@ -185,18 +179,6 @@ fun Greeting(
                 surfaceRequest = request,
                 modifier = Modifier.fillMaxSize()
             )
-//            Canvas(modifier = Modifier.fillMaxSize()) {
-//                pathState.value.forEach {
-//                    drawPath(
-//                        path = it,
-//                        color = Color.Black,
-//                        style = Stroke(width = 10f)
-//                    )
-//                }
-//                println(rect.value)
-//                println(rect.value.topLeft)
-//                println(rect.value.size)
-//            }
             Column(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxSize()
@@ -212,7 +194,6 @@ fun Greeting(
                                 }
 
                                 override fun onCaptureSuccess(image: ImageProxy) {
-                                    taken.value = true
                                     val bitmapImage = image.toBitmap()
                                     super.onCaptureSuccess(image)
 

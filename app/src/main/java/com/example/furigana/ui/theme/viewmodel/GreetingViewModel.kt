@@ -28,22 +28,6 @@ import java.util.concurrent.Executors
 
 class GreetingViewModel(application: Application) : AndroidViewModel(application) {
 
-//    private val context = getApplication<Application>().applicationContext
-
-    //    val orientationEventListener =
-//        object : OrientationEventListener(context) {
-//            override fun onOrientationChanged(orientation: Int) {
-//                if (orientation == ORIENTATION_UNKNOWN) return
-//
-//                val rotation = when (orientation) {
-//                    in 45 until 135 -> Surface.ROTATION_270
-//                    in 135 until 225 -> Surface.ROTATION_180
-//                    in 225 until 315 -> Surface.ROTATION_90
-//                    else -> Surface.ROTATION_0
-//                }
-//                imageCapture.targetRotation = rotation
-//            }
-//        }
     private val _box = MutableStateFlow(Array<Point>(4) { Point() })
     val box = _box.asStateFlow()
     private val _imageBitmap = MutableStateFlow(createBitmap(100, 100))
@@ -90,7 +74,6 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
             )
         }
     }
-
     val imageCapture: ImageCapture = ImageCapture.Builder()
 //        .setResolutionSelector(
 //            ResolutionSelector.Builder()
@@ -102,7 +85,6 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
         //TODO: fix deprecation
         .setTargetAspectRatio(RATIO_16_9)
         .build()
-    val cameraExecutor = Executors.newSingleThreadExecutor()
 
     val imageAnalyzer = ImageAnalysis.Builder()
         .setTargetAspectRatio(RATIO_16_9)
