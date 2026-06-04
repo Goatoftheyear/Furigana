@@ -43,14 +43,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.atilika.kuromoji.ipadic.Tokenizer
 import com.example.furigana.ui.theme.viewmodel.GreetingViewModel
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 import androidx.core.graphics.createBitmap
-import com.google.mlkit.vision.common.InputImage
-import java.util.concurrent.Executors
-import kotlin.math.abs
 
 @Composable
 fun Greeting(
@@ -82,9 +76,6 @@ fun Greeting(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { res -> println(res) }
     )
-    val tokenizer = Tokenizer()
-
-    val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
 
     val pathState = viewModel.path.collectAsState()
 
@@ -182,68 +173,10 @@ fun Greeting(
                                         bitmapImage, 0, 0, bitmapImage.width,
                                         bitmapImage.height, matrix, true
                                     ))
+                                    viewModel.startRecognizerProcess(windowInfo.containerSize.width.toFloat() ,windowInfo.containerSize.height.toFloat())
                                             onNavigateResult()
 
-                                    recognizer.process(InputImage.fromBitmap(bitMapInMemory.value, 0))
-                                        .addOnSuccessListener { text ->
-                                            val ans = text.textBlocks
-                                            val paths = mutableListOf<Path>()
-                                            for (line in ans) {
-                                                box.value = line.cornerPoints!!
-                                                rect.value = line.boundingBox!!.toComposeRect()
 
-                                                val scaleHorizontal = windowInfo.containerSize.width.toFloat() / image.toBitmap().width
-                                                val scaleVertical = windowInfo.containerSize.height.toFloat() / image.toBitmap().height
-                                                var prev = Point(
-                                                    line.cornerPoints!![0].x,
-                                                    line.cornerPoints!![0].y
-                                                )
-                                                var findLongestSide = mutableMapOf<String, Float>()
-                                                findLongestSide.put("x", 0.0f)
-                                                findLongestSide.put("y", 0.0f)
-                                                line.cornerPoints!!.map {
-                                                    if( abs(it.x - prev.x)  > findLongestSide.get("x")!! ) {
-                                                        findLongestSide.put("x",
-                                                            abs(it.x - prev.x).toFloat()
-                                                        )
-                                                    }
-                                                    if( abs(it.y - prev.y)  > findLongestSide.get("y")!! ) {
-                                                        findLongestSide.put("y",
-                                                            abs(it.y - prev.y).toFloat()
-                                                        )
-                                                    }
-                                                    prev = it
-                                                }
-                                                var startTextPointReference = mutableMapOf<String, Point>()
-                                                if(findLongestSide["x"]!! > findLongestSide["y"]!!) {
-                                                    startTextPointReference.put("horizontal", line.cornerPoints!![0])
-                                                } else {
-                                                    startTextPointReference.put("horizontal", line.cornerPoints!![1])
-
-                                                }
-                                                val path = Path().apply {
-                                                    line.cornerPoints!!.mapIndexed { index, point ->
-
-                                                        if (index == 0) {
-                                                            println("move ${point.x * scaleHorizontal} ${point.y * scaleVertical}")
-                                                            moveTo( point.x.toFloat() * scaleHorizontal,  point.y.toFloat() * scaleVertical)
-                                                        } else {
-                                                            println("move ${point.x * scaleHorizontal} ${point.y * scaleVertical}")
-                                                            lineTo(point.x.toFloat() * scaleHorizontal, point.y.toFloat()  * scaleVertical)
-                                                        }
-                                                    }
-                                                    close()
-                                                }
-                                                paths.add(path)
-                                                val lineText = line.text
-                                                println(lineText)
-                                                val tokens = tokenizer.tokenize(lineText)
-//                                                for (token in tokens) {
-//                                                    println(token.getSurface() + "\t" + token.getAllFeatures())
-//                                                }
-                                            }
-                                            viewModel.setPath(paths)
-                                        }
                                 }
                             }
                         )

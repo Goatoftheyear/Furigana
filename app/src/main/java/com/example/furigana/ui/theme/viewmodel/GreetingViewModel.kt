@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
+import com.atilika.kuromoji.ipadic.Tokenizer
+import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 import kotlinx.coroutines.awaitCancellation
@@ -24,7 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.util.concurrent.Executors
+import kotlin.math.abs
 
 class GreetingViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -48,6 +50,7 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
     private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     private var surfaceMeteringPointFactory: SurfaceOrientedMeteringPointFactory? = null
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest.asStateFlow()
+    val tokenizer = Tokenizer()
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
 
     private val cameraPreviewUseCase = Preview.Builder().build().apply {
@@ -102,5 +105,67 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
         _path.update {
             path
         }
+    }
+    fun startRecognizerProcess(screenWidth: Float, screenHeight: Float) {
+        recognizer.process(InputImage.fromBitmap(_imageBitmap.value, 0))
+            .addOnSuccessListener { text ->
+                val ans = text.textBlocks
+                val paths = mutableListOf<Path>()
+                for (line in ans) {
+                    _box.value = line.cornerPoints!!
+//                    rect.value = line.boundingBox!!.toComposeRect()
+
+                    val scaleHorizontal = screenWidth / _imageBitmap.value.width
+                    val scaleVertical = screenHeight / _imageBitmap.value.height
+                    var prev = Point(
+                        line.cornerPoints!![0].x,
+                        line.cornerPoints!![0].y
+                    )
+                    var findLongestSide = mutableMapOf<String, Float>()
+                    findLongestSide.put("x", 0.0f)
+                    findLongestSide.put("y", 0.0f)
+                    line.cornerPoints!!.map {
+                        if( abs(it.x - prev.x)  > findLongestSide.get("x")!! ) {
+                            findLongestSide.put("x",
+                                abs(it.x - prev.x).toFloat()
+                            )
+                        }
+                        if( abs(it.y - prev.y)  > findLongestSide.get("y")!! ) {
+                            findLongestSide.put("y",
+                                abs(it.y - prev.y).toFloat()
+                            )
+                        }
+                        prev = it
+                    }
+                    var startTextPointReference = mutableMapOf<String, Point>()
+                    if(findLongestSide["x"]!! > findLongestSide["y"]!!) {
+                        startTextPointReference.put("horizontal", line.cornerPoints!![0])
+                    } else {
+                        startTextPointReference.put("horizontal", line.cornerPoints!![1])
+
+                    }
+                    val path = Path().apply {
+                        line.cornerPoints!!.mapIndexed { index, point ->
+
+                            if (index == 0) {
+                                println("move ${point.x * scaleHorizontal} ${point.y * scaleVertical}")
+                                moveTo( point.x.toFloat() * scaleHorizontal,  point.y.toFloat() * scaleVertical)
+                            } else {
+                                println("move ${point.x * scaleHorizontal} ${point.y * scaleVertical}")
+                                lineTo(point.x.toFloat() * scaleHorizontal, point.y.toFloat()  * scaleVertical)
+                            }
+                        }
+                        close()
+                    }
+                    paths.add(path)
+                    val lineText = line.text
+                    println(lineText)
+                    val tokens = tokenizer.tokenize(lineText)
+                    for (token in tokens) {
+                        println(token.getSurface() + "\t" + token.getAllFeatures())
+                    }
+                }
+                setPath(paths)
+            }
     }
 }
