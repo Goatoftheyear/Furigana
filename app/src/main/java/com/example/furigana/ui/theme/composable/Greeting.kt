@@ -182,6 +182,8 @@ fun Greeting(
                                         bitmapImage, 0, 0, bitmapImage.width,
                                         bitmapImage.height, matrix, true
                                     ))
+                                            onNavigateResult()
+
                                     recognizer.process(InputImage.fromBitmap(bitMapInMemory.value, 0))
                                         .addOnSuccessListener { text ->
                                             val ans = text.textBlocks
