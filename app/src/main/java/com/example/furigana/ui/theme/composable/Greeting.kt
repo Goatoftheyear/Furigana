@@ -27,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.asImageBitmap
@@ -37,7 +36,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -121,28 +119,7 @@ fun Greeting(
     LaunchedEffect(lifecycleOwner) {
         viewModel.bindToCamera(context.applicationContext, lifecycleOwner)
     }
-
-    println("width ${bitMapInMemory.value.width}")
-    if (taken.value) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                modifier = Modifier
-                    .fillMaxSize(),
-                bitmap = bitMapInMemory.value.asImageBitmap(),
-                contentDescription = "hi"
-            )
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                pathState.value.forEach {
-                    drawPath(
-                        path = it,
-                        color = Color.Black,
-                        style = Stroke(width = 10f)
-                    )
-                }
-            }
-        }
-    }
-    else if (cameraPermission == PackageManager.PERMISSION_GRANTED) {
+    if (cameraPermission == PackageManager.PERMISSION_GRANTED) {
         surfaceRequest?.let { request ->
             CameraXViewfinder(
                 surfaceRequest = request,
@@ -165,7 +142,6 @@ fun Greeting(
                                 override fun onCaptureSuccess(image: ImageProxy) {
                                     val bitmapImage = image.toBitmap()
                                     super.onCaptureSuccess(image)
-
                                         val matrix = Matrix().apply {
                                             postRotate(image.imageInfo.rotationDegrees.toFloat())
                                         }
