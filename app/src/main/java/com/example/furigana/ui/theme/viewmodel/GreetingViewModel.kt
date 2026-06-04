@@ -50,18 +50,6 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest.asStateFlow()
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
 
-
-    fun setBitmap(bitmap: Bitmap) {
-        _imageBitmap.update {
-            bitmap
-        }
-    }
-
-    fun setPath(path: MutableList<Path>) {
-        _path.update {
-            path
-        }
-    }
     private val cameraPreviewUseCase = Preview.Builder().build().apply {
         setSurfaceProvider { newSurfaceRequest ->
             _surfaceRequest.update {
@@ -100,6 +88,19 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
             awaitCancellation()
         } finally {
             processCameraProvider.unbindAll()
+        }
+    }
+
+
+    fun setBitmap(bitmap: Bitmap) {
+        _imageBitmap.update {
+            bitmap
+        }
+    }
+
+    fun setPath(path: MutableList<Path>) {
+        _path.update {
+            path
         }
     }
 }
