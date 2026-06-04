@@ -60,6 +60,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.core.graphics.createBitmap
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
+import kotlin.math.abs
 
 @Composable
 fun Greeting(
@@ -260,45 +261,44 @@ fun Greeting(
 //                                    recognizer.process(bitMapInMemory.value, 0)
                                     recognizer.process(InputImage.fromBitmap(bitMapInMemory.value, 0))
                                         .addOnSuccessListener { text ->
-
                                             val ans = text.textBlocks
+                                            val paths = mutableListOf<Path>()
                                             for (line in ans) {
-//                                                line.cornerPoints?.mapIndexed { index, it ->
-//                                                    println("$index $it")
-//
-//                                                }
                                                 box.value = line.cornerPoints!!
-
                                                 rect.value = line.boundingBox!!.toComposeRect()
-//                                                val scaleHorizontal = config.screenWidthDp
-//                                                val scaleHorizontal = config.screenHeightDp
+
                                                 val scaleHorizontal = windowInfo.containerSize.width.toFloat() / image.toBitmap().width
                                                 val scaleVertical = windowInfo.containerSize.height.toFloat() / image.toBitmap().height
+                                                var prev = Point(
+                                                    line.cornerPoints!![0].x,
+                                                    line.cornerPoints!![0].y
+                                                )
+                                                var findLongestSide = mutableMapOf<String, Float>()
+                                                findLongestSide.put("x", 0.0f)
+                                                findLongestSide.put("y", 0.0f)
+                                                line.cornerPoints!!.map {
+                                                    if( abs(it.x - prev.x)  > findLongestSide.get("x")!! ) {
+                                                        findLongestSide.put("x",
+                                                            abs(it.x - prev.x).toFloat()
+                                                        )
+                                                    }
+                                                    if( abs(it.y - prev.y)  > findLongestSide.get("y")!! ) {
+                                                        findLongestSide.put("y",
+                                                            abs(it.y - prev.y).toFloat()
+                                                        )
+                                                    }
+                                                    prev = it
+                                                }
+                                                var startTextPointReference = mutableMapOf<String, Point>()
+                                                if(findLongestSide["x"]!! > findLongestSide["y"]!!) {
+                                                    startTextPointReference.put("horizontal", line.cornerPoints!![0])
+                                                } else {
+                                                    startTextPointReference.put("horizontal", line.cornerPoints!![1])
 
-//                                                println("testtest ${line.cornerPoints}")
-//                                                println("testtest ${line.boundingBox}")
-//
-//                                                println("testtop ${line.boundingBox?.top}")
-//                                                println("testbottom ${line.boundingBox?.bottom}")
-//                                                println("testleft ${line.boundingBox?.left}")
-//                                                println("testright ${line.boundingBox?.right}")
-
-//                                                val path = Path().apply {
-//                                                    box.value.mapIndexed { index, point ->
-//                                                        if (index == 0) {
-////                                                            println("move ${point.x} ${point.y}")
-//                                                            moveTo( point.x.toFloat()/2,  point.y.toFloat()/2)
-//                                                        } else {
-////                                                            println("line ${point.x} ${point.y}")
-//                                                            lineTo(point.x.toFloat()/2, point.y.toFloat()/2)
-//                                                        }
-//                                                    }
-//                                                    close()
-//                                                }
-                                                println("test $scaleHorizontal")
-                                                println("test $scaleVertical")
+                                                }
                                                 val path = Path().apply {
                                                     line.cornerPoints!!.mapIndexed { index, point ->
+
                                                         if (index == 0) {
                                                             println("move ${point.x * scaleHorizontal} ${point.y * scaleVertical}")
                                                             moveTo( point.x.toFloat() * scaleHorizontal,  point.y.toFloat() * scaleVertical)
@@ -309,8 +309,7 @@ fun Greeting(
                                                     }
                                                     close()
                                                 }
-                                                viewModel.setPath(path)
-
+                                                paths.add(path)
 //                                                val mutableBitMap = image.toBitmap().copy(Bitmap.Config.ARGB_8888, true)
 //                                                val canvas = Canvas(mutableBitMap)
 //                                                canvas.drawPath(path, Paint().apply {
@@ -323,6 +322,7 @@ fun Greeting(
 //                                                    println(token.getSurface() + "\t" + token.getAllFeatures())
 //                                                }
                                             }
+                                            viewModel.setPath(paths)
                                         }
                                 }
                             }

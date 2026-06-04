@@ -57,19 +57,23 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
         }
         close()
     }))
-
     val path = _path.asStateFlow()
-
     private val _surfaceRequest = MutableStateFlow<SurfaceRequest?>(null)
     private var surfaceMeteringPointFactory: SurfaceOrientedMeteringPointFactory? = null
-
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest.asStateFlow()
-
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
 
-    fun setPath(path: Path) {
-        _path.value.add(path)
-        _path.value = _path.value.toMutableList()
+
+    fun setBitmap(bitmap: Bitmap) {
+        _imageBitmap.update {
+            bitmap
+        }
+    }
+
+    fun setPath(path: MutableList<Path>) {
+        _path.update {
+            path
+        }
     }
     private val cameraPreviewUseCase = Preview.Builder().build().apply {
         setSurfaceProvider { newSurfaceRequest ->
