@@ -2,6 +2,7 @@ package com.example.furigana.ui.theme.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Point
 import androidx.camera.core.AspectRatio.RATIO_16_9
 import androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA
@@ -13,6 +14,7 @@ import androidx.camera.core.SurfaceRequest
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.ui.graphics.Path
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import com.google.mlkit.vision.text.TextRecognition
@@ -44,7 +46,8 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
 //        }
     private val _box = MutableStateFlow(Array<Point>(4) { Point() })
     val box = _box.asStateFlow()
-
+    private val _imageBitmap = MutableStateFlow(createBitmap(100, 100))
+    val imageBitmap = _imageBitmap.asStateFlow()
     private var _path = MutableStateFlow( mutableListOf(Path().apply {
         _box.value.mapIndexed { index, point ->
             if (index == 0) {
@@ -87,7 +90,6 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
             )
         }
     }
-
 
     val imageCapture: ImageCapture = ImageCapture.Builder()
 //        .setResolutionSelector(
