@@ -52,6 +52,9 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest.asStateFlow()
     val tokenizer = Tokenizer()
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
+    //TODO: use processing
+    val _isProcessing = MutableStateFlow<Boolean>(false)
+    val isProcessing = _isProcessing.asStateFlow()
 
     private val cameraPreviewUseCase = Preview.Builder().build().apply {
         setSurfaceProvider { newSurfaceRequest ->
@@ -106,7 +109,14 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
             path
         }
     }
+
+    fun setIsProcessing(isProcessing: Boolean) {
+        _isProcessing.update {
+            isProcessing
+        }
+    }
     fun startRecognizerProcess(screenWidth: Float, screenHeight: Float) {
+        setIsProcessing(true)
         recognizer.process(InputImage.fromBitmap(_imageBitmap.value, 0))
             .addOnSuccessListener { text ->
                 val ans = text.textBlocks
@@ -166,6 +176,7 @@ class GreetingViewModel(application: Application) : AndroidViewModel(application
                     }
                 }
                 setPath(paths)
+                setIsProcessing(false)
             }
     }
 }

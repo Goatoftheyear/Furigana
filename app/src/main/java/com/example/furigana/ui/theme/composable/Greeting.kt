@@ -74,7 +74,7 @@ fun Greeting(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { res -> println(res) }
     )
-
+    val isProcessing = viewModel.isProcessing.collectAsState()
     val pathState = viewModel.path.collectAsState()
 
 //    DisposableEffect(Unit) {
@@ -150,7 +150,7 @@ fun Greeting(
                                         bitmapImage.height, matrix, true
                                     ))
                                     viewModel.startRecognizerProcess(windowInfo.containerSize.width.toFloat() ,windowInfo.containerSize.height.toFloat())
-                                            onNavigateResult()
+                                    onNavigateResult()
 
 
                                 }
