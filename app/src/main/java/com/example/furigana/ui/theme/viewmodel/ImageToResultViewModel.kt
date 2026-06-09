@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.math.abs
 
-class GreetingViewModel(application: Application) : AndroidViewModel(application) {
+class ImageToResultViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _box = MutableStateFlow(Array<Point>(4) { Point() })
     val box = _box.asStateFlow()

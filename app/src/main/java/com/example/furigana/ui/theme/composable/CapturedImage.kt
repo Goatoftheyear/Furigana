@@ -17,11 +17,11 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.furigana.ui.theme.viewmodel.GreetingViewModel
+import com.example.furigana.ui.theme.viewmodel.ImageToResultViewModel
 
 @Composable
 fun CapturedImage(
-    viewModel: GreetingViewModel = viewModel()
+    viewModel: ImageToResultViewModel = viewModel()
 ) {
     //TODO: add processing
     val bitmap = viewModel.imageBitmap.collectAsState()

@@ -41,7 +41,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.furigana.ui.theme.viewmodel.GreetingViewModel
+import com.example.furigana.ui.theme.viewmodel.ImageToResultViewModel
 import androidx.core.graphics.createBitmap
 
 @Composable
@@ -49,7 +49,7 @@ fun Greeting(
     modifier: Modifier = Modifier,
     onNavigateResult: () -> Boolean,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    viewModel: GreetingViewModel = viewModel(),
+    viewModel: ImageToResultViewModel = viewModel(),
 ) {
     // Preview shows the camera be4 taking
     // preview is just a canvas, need sth to paint on it
