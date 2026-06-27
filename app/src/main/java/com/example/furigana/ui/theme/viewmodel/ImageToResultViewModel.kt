@@ -28,12 +28,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.math.abs
 
+data class TokenResult(
+    val surface: String,
+    val reading: String,
+)
+
 class ImageToResultViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _box = MutableStateFlow(Array<Point>(4) { Point() })
     val box = _box.asStateFlow()
     private val _imageBitmap = MutableStateFlow(createBitmap(100, 100))
     val imageBitmap = _imageBitmap.asStateFlow()
+    private val _tokens = MutableStateFlow<List<List<TokenResult>>>(emptyList())
+    val tokens = _tokens.asStateFlow()
     private var _path = MutableStateFlow( mutableListOf(Path().apply {
         _box.value.mapIndexed { index, point ->
             if (index == 0) {
@@ -55,7 +62,13 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     //TODO: use processing
     val _isProcessing = MutableStateFlow<Boolean>(false)
     val isProcessing = _isProcessing.asStateFlow()
-
+    private val _results = MutableStateFlow<List<String>>(mutableListOf())
+    val results = _results.asStateFlow()
+    //TODO use this 1 for result, get ans from kuromuji, put value if its kanji and loop the keys
+    private val _furiganaResults = MutableStateFlow<Map<String, String>>(mutableMapOf())
+    val furiganaResults = _furiganaResults.asStateFlow()
+    val hiraganaRegex = Regex("\\p{Script=Hiragana}+")
+    val katakanaRegex = Regex("\\p{Script=Katakana}+")
     private val cameraPreviewUseCase = Preview.Builder().build().apply {
         setSurfaceProvider { newSurfaceRequest ->
             _surfaceRequest.update {
@@ -115,14 +128,23 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
             isProcessing
         }
     }
+
+    fun setFuriganaResults(results: MutableMap<String,String>) {
+        _furiganaResults.update {
+            results
+        }
+    }
     fun startRecognizerProcess(screenWidth: Float, screenHeight: Float) {
         setIsProcessing(true)
         recognizer.process(InputImage.fromBitmap(_imageBitmap.value, 0))
             .addOnSuccessListener { text ->
+                val currentResults: MutableList<String> = mutableListOf()
+                val furiganaOutput: MutableMap<String, String> = mutableMapOf()
                 val ans = text.textBlocks
                 val paths = mutableListOf<Path>()
                 for (line in ans) {
                     _box.value = line.cornerPoints!!
+                    //TODO: kept it for experimentation
 //                    rect.value = line.boundingBox!!.toComposeRect()
 
                     val scaleHorizontal = screenWidth / _imageBitmap.value.width
@@ -169,14 +191,29 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                     }
                     paths.add(path)
                     val lineText = line.text
-                    println(lineText)
                     val tokens = tokenizer.tokenize(lineText)
+                    currentResults.add("test ${line.text}")
                     for (token in tokens) {
-                        println(token.getSurface() + "\t" + token.getAllFeatures())
+                        val furigana = token.allFeaturesArray[token.allFeaturesArray.lastIndex]
+                        println("test ${hiraganaRegex.matches(token.surface)}")
+                        if (hiraganaRegex.matches(token.surface)
+                            || katakanaRegex.matches(token.surface)
+                            //check for empty result
+                            || !katakanaRegex.matches(furigana)) {
+                            furiganaOutput.put(token.surface, "")
+                            continue
+                        }
+                        val furiganaHiragana = furigana.map {
+                            it -> (it.code -  0x0060).toChar()
+                        }.joinToString("")
+                        currentResults.add(token.surface + "\t" + furiganaHiragana)
+                        furiganaOutput.put(token.surface, furiganaHiragana)
                     }
                 }
                 setPath(paths)
                 setIsProcessing(false)
+                setFuriganaResults(furiganaOutput)
             }
+            .addOnFailureListener { setIsProcessing(false) }
     }
 }
