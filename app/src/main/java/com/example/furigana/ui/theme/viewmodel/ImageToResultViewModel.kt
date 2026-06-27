@@ -36,11 +36,9 @@ data class TokenResult(
 class ImageToResultViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _box = MutableStateFlow(Array<Point>(4) { Point() })
-    val box = _box.asStateFlow()
     private val _imageBitmap = MutableStateFlow(createBitmap(100, 100))
     val imageBitmap = _imageBitmap.asStateFlow()
     private val _tokens = MutableStateFlow<List<List<TokenResult>>>(emptyList())
-    val tokens = _tokens.asStateFlow()
     private var _path = MutableStateFlow( mutableListOf(Path().apply {
         _box.value.mapIndexed { index, point ->
             if (index == 0) {
@@ -60,7 +58,7 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     val tokenizer = Tokenizer()
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
     //TODO: use processing
-    val _isProcessing = MutableStateFlow<Boolean>(false)
+    val _isProcessing = MutableStateFlow(false)
     val isProcessing = _isProcessing.asStateFlow()
     private val _results = MutableStateFlow<List<String>>(mutableListOf())
     val results = _results.asStateFlow()

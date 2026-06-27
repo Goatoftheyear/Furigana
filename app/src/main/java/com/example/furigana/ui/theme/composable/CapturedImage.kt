@@ -43,9 +43,7 @@ fun CapturedImage(
     val bitmap = viewModel.imageBitmap.collectAsState()
     val isProcessing = viewModel.isProcessing.collectAsState()
     val path = viewModel.path.collectAsState()
-    val results = viewModel.results.collectAsState()
     val furiganaResults = viewModel.furiganaResults.collectAsState()
-    var showSheet by remember { mutableStateOf(true) }
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
         confirmValueChange = { sheetValue ->
@@ -78,18 +76,14 @@ fun CapturedImage(
             onDismissRequest = {},
             sheetState = sheetState,
         ) {
-            //TODO: somehow show furigana on top
             FlowRow() {
                 furiganaResults.value.keys.forEach { result ->
-//                        line.forEach { character ->
-
                     Column() {
                         Box(modifier = Modifier.height(10.dp),
                             contentAlignment = Alignment.Center) {
                             Text(furiganaResults.value[result]!!, fontSize = 8.sp)
                         }
                         Text(result) }
-//                        }
                 }
             }
         }
