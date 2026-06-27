@@ -79,11 +79,14 @@ fun CapturedImage(
             FlowRow() {
                 furiganaResults.value.keys.forEach { result ->
                     Column() {
-                        Box(modifier = Modifier.height(10.dp),
-                            contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.height(10.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(furiganaResults.value[result]!!, fontSize = 8.sp)
                         }
-                        Text(result) }
+                        Text(result)
+                    }
                 }
             }
         }

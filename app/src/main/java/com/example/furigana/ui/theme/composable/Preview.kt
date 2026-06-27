@@ -56,12 +56,12 @@ fun Greeting(
 
     //TODO: put code below into viewModel
 //    var box: Array<out Point?>? = Array<Point>(4) { Point() }
-    val box = remember {mutableStateOf(Array<Point>(4) { Point() })}
-    val rect = remember {mutableStateOf(Rect().toComposeRect())}
+    val box = remember { mutableStateOf(Array<Point>(4) { Point() }) }
+    val rect = remember { mutableStateOf(Rect().toComposeRect()) }
     // TODO: end of code
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
-    var bitMapInMemory= remember { mutableStateOf(createBitmap(100, 100)) }
-    var taken = remember {mutableStateOf(false)}
+    var bitMapInMemory = remember { mutableStateOf(createBitmap(100, 100)) }
+    var taken = remember { mutableStateOf(false) }
     val cameraPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
     val permission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -135,14 +135,19 @@ fun Greeting(
                                 override fun onCaptureSuccess(image: ImageProxy) {
                                     val bitmapImage = image.toBitmap()
                                     super.onCaptureSuccess(image)
-                                        val matrix = Matrix().apply {
-                                            postRotate(image.imageInfo.rotationDegrees.toFloat())
-                                        }
-                                    viewModel.setBitmap(Bitmap.createBitmap(
-                                        bitmapImage, 0, 0, bitmapImage.width,
-                                        bitmapImage.height, matrix, true
-                                    ))
-                                    viewModel.startRecognizerProcess(windowInfo.containerSize.width.toFloat() ,windowInfo.containerSize.height.toFloat())
+                                    val matrix = Matrix().apply {
+                                        postRotate(image.imageInfo.rotationDegrees.toFloat())
+                                    }
+                                    viewModel.setBitmap(
+                                        Bitmap.createBitmap(
+                                            bitmapImage, 0, 0, bitmapImage.width,
+                                            bitmapImage.height, matrix, true
+                                        )
+                                    )
+                                    viewModel.startRecognizerProcess(
+                                        windowInfo.containerSize.width.toFloat(),
+                                        windowInfo.containerSize.height.toFloat()
+                                    )
                                     onNavigateResult()
 
 
@@ -161,22 +166,24 @@ fun Greeting(
             }
         }
     } else {
-            Column(verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = "Camera is required to use this app",
+                textAlign = TextAlign.Center
+            )
+            Button(
+                onClick = {
+                    permission.launch(Manifest.permission.CAMERA)
+                }
+            ) {
                 Text(
-                    text = "Camera is required to use this app",
+                    text = "Allow",
                     textAlign = TextAlign.Center
                 )
-                    Button(
-                        onClick = {
-                            permission.launch(Manifest.permission.CAMERA)
-                        }
-                    ) {
-                        Text(
-                            text = "Allow",
-                            textAlign = TextAlign.Center
-                        )
-                    }
             }
+        }
     }
 }

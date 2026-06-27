@@ -42,7 +42,7 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     private val _imageBitmap = MutableStateFlow(createBitmap(100, 100))
     val imageBitmap = _imageBitmap.asStateFlow()
     private val _tokens = MutableStateFlow<List<List<TokenResult>>>(emptyList())
-    private var _path = MutableStateFlow( mutableListOf(Path().apply {
+    private var _path = MutableStateFlow(mutableListOf(Path().apply {
         _box.value.mapIndexed { index, point ->
             if (index == 0) {
                 println("move ${point.x} ${point.y}")
@@ -60,11 +60,13 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest.asStateFlow()
     val tokenizer = Tokenizer()
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
+
     //TODO: use processing
     val _isProcessing = MutableStateFlow(false)
     val isProcessing = _isProcessing.asStateFlow()
     private val _results = MutableStateFlow<List<String>>(mutableListOf())
     val results = _results.asStateFlow()
+
     //TODO use this 1 for result, get ans from kuromuji, put value if its kanji and loop the keys
     private val _furiganaResults = MutableStateFlow<Map<String, String>>(mutableMapOf())
     val furiganaResults = _furiganaResults.asStateFlow()
@@ -130,11 +132,12 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    fun setFuriganaResults(results: MutableMap<String,String>) {
+    fun setFuriganaResults(results: MutableMap<String, String>) {
         _furiganaResults.update {
             results
         }
     }
+
     fun startRecognizerProcess(screenWidth: Float, screenHeight: Float) {
         setIsProcessing(true)
         recognizer.process(InputImage.fromBitmap(_imageBitmap.value, 0))
@@ -158,20 +161,22 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                     findLongestSide.put("x", 0.0f)
                     findLongestSide.put("y", 0.0f)
                     line.cornerPoints!!.map {
-                        if( abs(it.x - prev.x)  > findLongestSide.get("x")!! ) {
-                            findLongestSide.put("x",
+                        if (abs(it.x - prev.x) > findLongestSide.get("x")!!) {
+                            findLongestSide.put(
+                                "x",
                                 abs(it.x - prev.x).toFloat()
                             )
                         }
-                        if( abs(it.y - prev.y)  > findLongestSide.get("y")!! ) {
-                            findLongestSide.put("y",
+                        if (abs(it.y - prev.y) > findLongestSide.get("y")!!) {
+                            findLongestSide.put(
+                                "y",
                                 abs(it.y - prev.y).toFloat()
                             )
                         }
                         prev = it
                     }
                     var startTextPointReference = mutableMapOf<String, Point>()
-                    if(findLongestSide["x"]!! > findLongestSide["y"]!!) {
+                    if (findLongestSide["x"]!! > findLongestSide["y"]!!) {
                         startTextPointReference.put("horizontal", line.cornerPoints!![0])
                     } else {
                         startTextPointReference.put("horizontal", line.cornerPoints!![1])
@@ -182,10 +187,16 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
 
                             if (index == 0) {
                                 println("move ${point.x * scaleHorizontal} ${point.y * scaleVertical}")
-                                moveTo( point.x.toFloat() * scaleHorizontal,  point.y.toFloat() * scaleVertical)
+                                moveTo(
+                                    point.x.toFloat() * scaleHorizontal,
+                                    point.y.toFloat() * scaleVertical
+                                )
                             } else {
                                 println("move ${point.x * scaleHorizontal} ${point.y * scaleVertical}")
-                                lineTo(point.x.toFloat() * scaleHorizontal, point.y.toFloat()  * scaleVertical)
+                                lineTo(
+                                    point.x.toFloat() * scaleHorizontal,
+                                    point.y.toFloat() * scaleVertical
+                                )
                             }
                         }
                         close()
@@ -200,12 +211,13 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                         if (hiraganaRegex.matches(token.surface)
                             || katakanaRegex.matches(token.surface)
                             //check for empty result
-                            || !katakanaRegex.matches(furigana)) {
+                            || !katakanaRegex.matches(furigana)
+                        ) {
                             furiganaOutput.put(token.surface, "")
                             continue
                         }
-                        val furiganaHiragana = furigana.map {
-                            it -> (it.code -  0x0060).toChar()
+                        val furiganaHiragana = furigana.map { it ->
+                            (it.code - 0x0060).toChar()
                         }.joinToString("")
                         currentResults.add(token.surface + "\t" + furiganaHiragana)
                         furiganaOutput.put(token.surface, furiganaHiragana)

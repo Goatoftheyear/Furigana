@@ -32,8 +32,13 @@ class MainActivity : ComponentActivity() {
                     entryProvider = { key ->
                         when (key) {
 //                            backStack.add(Home)
-                            is RouteA -> NavEntry(key) { FuriganaTheme {Greeting(Modifier.padding(innerPadding),
-                                { backStack.add(Home) }) } }
+                            is RouteA -> NavEntry(key) {
+                                FuriganaTheme {
+                                    Greeting(
+                                        Modifier.padding(innerPadding),
+                                        { backStack.add(Home) })
+                                }
+                            }
 
                             is Home -> NavEntry(key) { CapturedImage() }
 
