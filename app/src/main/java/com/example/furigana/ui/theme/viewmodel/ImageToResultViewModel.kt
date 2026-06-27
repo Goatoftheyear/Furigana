@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Point
+import android.util.Size
 import androidx.camera.core.AspectRatio.RATIO_16_9
 import androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA
 import androidx.camera.core.ImageAnalysis
@@ -11,6 +12,8 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceOrientedMeteringPointFactory
 import androidx.camera.core.SurfaceRequest
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.ui.graphics.Path
@@ -79,20 +82,20 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
             )
         }
     }
+    private val resolutionSelector = ResolutionSelector.Builder()
+        .setResolutionStrategy(
+            ResolutionStrategy(
+                Size(1980, 1080),
+                ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
+            )
+        )
+        .build()
     val imageCapture: ImageCapture = ImageCapture.Builder()
-//        .setResolutionSelector(
-//            ResolutionSelector.Builder()
-//                .setResolutionStrategy(                ResolutionStrategy(
-//                    Size(1980, 1080),
-//                    ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER))
-//                .build()
-//        )
-        //TODO: fix deprecation
-        .setTargetAspectRatio(RATIO_16_9)
+        .setResolutionSelector(resolutionSelector)
         .build()
 
     val imageAnalyzer = ImageAnalysis.Builder()
-        .setTargetAspectRatio(RATIO_16_9)
+        .setResolutionSelector(resolutionSelector)
         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
         .build()
 
