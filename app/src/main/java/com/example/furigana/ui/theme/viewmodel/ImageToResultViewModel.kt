@@ -146,7 +146,6 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
         setIsProcessing(true)
         recognizer.process(InputImage.fromBitmap(_imageBitmap.value, 0))
             .addOnSuccessListener { text ->
-                val currentResults: MutableList<String> = mutableListOf()
                 val furiganaOutput: MutableMap<String, String> = mutableMapOf()
                 val ans = text.textBlocks
                 val paths = mutableListOf<Path>()
@@ -212,7 +211,6 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                     }
                     paths.add(path)
                     val tokens = tokenizer.tokenize(lineText)
-                    currentResults.add("test ${line.text}")
                     for (token in tokens) {
                         val furigana = token.allFeaturesArray[token.allFeaturesArray.lastIndex]
                         println("test ${hiraganaRegex.matches(token.surface)}")
@@ -227,7 +225,6 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                         val furiganaHiragana = furigana.map { it ->
                             (it.code - 0x0060).toChar()
                         }.joinToString("")
-                        currentResults.add(token.surface + "\t" + furiganaHiragana)
                         //Assume that all kanji with hiragana has only 1 hiragana at the end
                         if (hiraganaRegex.containsMatchIn(token.surface)) {
                             val kanjiOnly:String = token.surface.dropLast(1)
