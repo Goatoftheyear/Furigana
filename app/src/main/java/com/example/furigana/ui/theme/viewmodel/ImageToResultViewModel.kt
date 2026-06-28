@@ -32,17 +32,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.math.abs
 
-data class TokenResult(
-    val surface: String,
-    val reading: String,
-)
-
 class ImageToResultViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _box = MutableStateFlow(Array<Point>(4) { Point() })
     private val _imageBitmap = MutableStateFlow(createBitmap(100, 100))
     val imageBitmap = _imageBitmap.asStateFlow()
-    private val _tokens = MutableStateFlow<List<List<TokenResult>>>(emptyList())
     private var _path = MutableStateFlow(mutableListOf(Path().apply {
         _box.value.mapIndexed { index, point ->
             if (index == 0) {
@@ -61,13 +55,8 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     val surfaceRequest: StateFlow<SurfaceRequest?> = _surfaceRequest.asStateFlow()
     val tokenizer = Tokenizer()
     val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
-
-    //TODO: use processing
     val _isProcessing = MutableStateFlow(false)
     val isProcessing = _isProcessing.asStateFlow()
-    private val _results = MutableStateFlow<List<String>>(mutableListOf())
-    val results = _results.asStateFlow()
-
     private val _paragraph = MutableStateFlow<List<Map<String, String>>>(mutableListOf())
     val paragraph = _paragraph.asStateFlow()
     val hiraganaRegex = Regex("\\p{Script=Hiragana}+")
@@ -213,7 +202,6 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                     val tokens = tokenizer.tokenize(lineText)
                     for (token in tokens) {
                         val furigana = token.allFeaturesArray[token.allFeaturesArray.lastIndex]
-                        println("test ${hiraganaRegex.matches(token.surface)}")
                         if (hiraganaRegex.matches(token.surface)
                             || katakanaRegex.matches(token.surface)
                             //check for empty result
@@ -227,9 +215,9 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                         }.joinToString("")
                         //Assume that all kanji with hiragana has only 1 hiragana at the end
                         if (hiraganaRegex.containsMatchIn(token.surface)) {
-                            val kanjiOnly:String = token.surface.dropLast(1)
-                            val kanjiOnlyFurigana:String = furiganaHiragana.dropLast(1)
-                            val finalHiraganaCharacter:String = token.surface.last().toString()
+                            val kanjiOnly: String = token.surface.dropLast(1)
+                            val kanjiOnlyFurigana: String = furiganaHiragana.dropLast(1)
+                            val finalHiraganaCharacter: String = token.surface.last().toString()
                             furiganaOutput.put(kanjiOnly, kanjiOnlyFurigana)
                             furiganaOutput.put(finalHiraganaCharacter, "")
                         } else {
