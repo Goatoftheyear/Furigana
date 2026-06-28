@@ -72,6 +72,8 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     val furiganaResults = _furiganaResults.asStateFlow()
     val hiraganaRegex = Regex("\\p{Script=Hiragana}+")
     val katakanaRegex = Regex("\\p{Script=Katakana}+")
+    val europeanRegex = Regex("""[\s\p{P}]*\p{Script=Latin}+[\s\p{P}]*""")
+
     private val cameraPreviewUseCase = Preview.Builder().build().apply {
         setSurfaceProvider { newSurfaceRequest ->
             _surfaceRequest.update {
@@ -147,6 +149,11 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                 val ans = text.textBlocks
                 val paths = mutableListOf<Path>()
                 for (line in ans) {
+                    val lineText = line.text
+                    println("test test regex ${ europeanRegex.matches(lineText) }  $lineText")
+                    if(europeanRegex.containsMatchIn(lineText) &&
+                        !hiraganaRegex.containsMatchIn(lineText) &&
+                        !katakanaRegex.containsMatchIn((lineText))) continue
                     _box.value = line.cornerPoints!!
                     //TODO: kept it for experimentation
 //                    rect.value = line.boundingBox!!.toComposeRect()
@@ -202,7 +209,6 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                         close()
                     }
                     paths.add(path)
-                    val lineText = line.text
                     val tokens = tokenizer.tokenize(lineText)
                     currentResults.add("test ${line.text}")
                     for (token in tokens) {
