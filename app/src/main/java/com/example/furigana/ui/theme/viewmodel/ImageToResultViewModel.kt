@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.util.Size
-import androidx.camera.core.AspectRatio.RATIO_16_9
 import androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -154,7 +153,7 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                         line.cornerPoints!![0].x,
                         line.cornerPoints!![0].y
                     )
-                    var findLongestSide = mutableMapOf<String, Float>()
+                    val findLongestSide = mutableMapOf<String, Float>()
                     findLongestSide.put("x", 0.0f)
                     findLongestSide.put("y", 0.0f)
                     line.cornerPoints!!.map {
@@ -172,7 +171,7 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                         }
                         prev = it
                     }
-                    var startTextPointReference = mutableMapOf<String, Point>()
+                    val startTextPointReference = mutableMapOf<String, Point>()
                     if (findLongestSide["x"]!! > findLongestSide["y"]!!) {
                         startTextPointReference.put("horizontal", line.cornerPoints!![0])
                     } else {
