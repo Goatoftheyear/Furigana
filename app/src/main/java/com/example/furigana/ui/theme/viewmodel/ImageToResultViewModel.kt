@@ -228,7 +228,16 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                             (it.code - 0x0060).toChar()
                         }.joinToString("")
                         currentResults.add(token.surface + "\t" + furiganaHiragana)
-                        furiganaOutput.put(token.surface, furiganaHiragana)
+                        //Assume that all kanji with hiragana has only 1 hiragana at the end
+                        if (hiraganaRegex.containsMatchIn(token.surface)) {
+                            val kanjiOnly:String = token.surface.dropLast(1)
+                            val kanjiOnlyFurigana:String = furiganaHiragana.dropLast(1)
+                            val finalHiraganaCharacter:String = token.surface.last().toString()
+                            furiganaOutput.put(kanjiOnly, kanjiOnlyFurigana)
+                            furiganaOutput.put(finalHiraganaCharacter, "")
+                        } else {
+                            furiganaOutput.put(token.surface, furiganaHiragana)
+                        }
                     }
                 }
                 setPath(paths)
