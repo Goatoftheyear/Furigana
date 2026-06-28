@@ -89,7 +89,7 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     private val resolutionSelector = ResolutionSelector.Builder()
         .setResolutionStrategy(
             ResolutionStrategy(
-                Size(1980, 1080),
+                Size(1920, 1080),
                 ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER
             )
         )
