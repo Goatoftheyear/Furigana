@@ -68,9 +68,8 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     private val _results = MutableStateFlow<List<String>>(mutableListOf())
     val results = _results.asStateFlow()
 
-    //TODO use this 1 for result, get ans from kuromuji, put value if its kanji and loop the keys
-    private val _furiganaResults = MutableStateFlow<Map<String, String>>(mutableMapOf())
-    val furiganaResults = _furiganaResults.asStateFlow()
+    private val _paragraph = MutableStateFlow<List<Map<String, String>>>(mutableListOf())
+    val paragraph = _paragraph.asStateFlow()
     val hiraganaRegex = Regex("\\p{Script=Hiragana}+")
     val katakanaRegex = Regex("\\p{Script=Katakana}+")
     val europeanRegex = Regex("""[\s\p{P}]*\p{Script=Latin}+[\s\p{P}]*""")
@@ -136,9 +135,9 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
-    fun setFuriganaResults(results: MutableMap<String, String>) {
-        _furiganaResults.update {
-            results
+    fun setFuriganaResults(allTokenResults: List<MutableMap<String, String>>) {
+        _paragraph.update {
+            allTokenResults
         }
     }
 
@@ -146,15 +145,16 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
         setIsProcessing(true)
         recognizer.process(InputImage.fromBitmap(_imageBitmap.value, 0))
             .addOnSuccessListener { text ->
-                val furiganaOutput: MutableMap<String, String> = mutableMapOf()
                 val ans = text.textBlocks
                 val paths = mutableListOf<Path>()
+                val allTokenResults = mutableListOf<MutableMap<String, String>>()
                 for (line in ans) {
+                    val furiganaOutput: MutableMap<String, String> = mutableMapOf()
                     val lineText = line.text
-                    println("test test regex ${ europeanRegex.matches(lineText) }  $lineText")
-                    if(europeanRegex.containsMatchIn(lineText) &&
+                    if (europeanRegex.containsMatchIn(lineText) &&
                         !hiraganaRegex.containsMatchIn(lineText) &&
-                        !katakanaRegex.containsMatchIn((lineText))) continue
+                        !katakanaRegex.containsMatchIn((lineText))
+                    ) continue
                     _box.value = line.cornerPoints!!
                     //TODO: kept it for experimentation
 //                    rect.value = line.boundingBox!!.toComposeRect()
@@ -236,10 +236,11 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                             furiganaOutput.put(token.surface, furiganaHiragana)
                         }
                     }
+                    allTokenResults.add(furiganaOutput)
                 }
+                setFuriganaResults(allTokenResults)
                 setPath(paths)
                 setIsProcessing(false)
-                setFuriganaResults(furiganaOutput)
             }
             .addOnFailureListener { setIsProcessing(false) }
     }
