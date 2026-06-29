@@ -83,7 +83,9 @@ fun CapturedImage(
                             Box(
                                 contentAlignment = Alignment.Center
                             ) {
-                                Column(verticalArrangement = Arrangement.Center) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center) {
                                     Box(
                                         modifier = Modifier.height(18.dp),
                                         contentAlignment = Alignment.Center
