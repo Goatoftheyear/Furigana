@@ -217,6 +217,9 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                         async(Dispatchers.Default) {
                                 val tokens = tokenizer.tokenize(lineText)
                                 for (token in tokens) {
+                                    if (token.allFeaturesArray.isEmpty()) {
+                                        continue
+                                    }
                                     val furigana =
                                         token.allFeaturesArray[token.allFeaturesArray.lastIndex]
                                     if (hiraganaRegex.matches(token.surface)
