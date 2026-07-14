@@ -133,6 +133,8 @@ fun Greeting(
                                 }
 
                                 override fun onCaptureSuccess(image: ImageProxy) {
+                                    viewModel.unbindCamera()
+                                    onNavigateResult()
                                     val bitmapImage = image.toBitmap()
                                     super.onCaptureSuccess(image)
                                     val matrix = Matrix().apply {
@@ -148,8 +150,6 @@ fun Greeting(
                                         windowInfo.containerSize.width.toFloat(),
                                         windowInfo.containerSize.height.toFloat()
                                     )
-                                    onNavigateResult()
-
 
                                 }
                             }
