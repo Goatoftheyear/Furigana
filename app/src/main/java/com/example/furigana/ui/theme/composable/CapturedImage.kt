@@ -23,7 +23,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.furigana.ui.theme.viewmodel.ImageToResultViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,11 +45,10 @@ fun CapturedImage(
     val isProcessing = viewModel.isProcessing.collectAsState()
     val path = viewModel.path.collectAsState()
     val paragraph = viewModel.paragraph.collectAsState()
+    val showSheet = remember { MutableStateFlow(true) }
+    val showSheetState = showSheet.collectAsState()
     val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false,
-        confirmValueChange = { sheetValue ->
-            sheetValue != SheetValue.Hidden
-        }
+        skipPartiallyExpanded = false
     )
     val scrollState = rememberScrollState()
     Box(modifier = Modifier.fillMaxSize()) {
@@ -64,7 +63,7 @@ fun CapturedImage(
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = Color.White)
         }
-    } else {
+    }
         Canvas(modifier = Modifier.fillMaxSize()) {
             for (p in path.value) {
                 drawPath(
@@ -74,29 +73,33 @@ fun CapturedImage(
                 )
             }
         }
-        ModalBottomSheet(
-            onDismissRequest = {},
-            sheetState = sheetState,
-        ) {
-            Column(
-                modifier = Modifier.verticalScroll(scrollState)
+        if (showSheetState.value && !isProcessing.value) {
+            ModalBottomSheet(
+                onDismissRequest = { showSheet.value = false },
+                sheetState = sheetState,
             ) {
-                paragraph.value.forEach { textField ->
-                    FlowRow() {
-                        textField.keys.forEach { it ->
-                            Box(
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center) {
-                                    Box(
-                                        modifier = Modifier.height(18.dp),
-                                        contentAlignment = Alignment.Center
+                LazyColumn(
+                    modifier = Modifier
+                        .height(300.dp)
+                ) {
+                     items(paragraph.value) { textField ->
+                        FlowRow() {
+                            textField.keys.forEach { it ->
+                                Box(
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
                                     ) {
-                                        Text(textField[it]!!, fontSize = 14.sp)
+                                        Box(
+                                            modifier = Modifier.height(18.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(textField[it]!!, fontSize = 14.sp)
+                                        }
+                                        Text(it, fontSize = 22.sp)
                                     }
-                                    Text(it, fontSize = 22.sp)
                                 }
                             }
                         }
@@ -104,6 +107,16 @@ fun CapturedImage(
                 }
             }
         }
-    }
+//        if (!showSheet) {
+//            FloatingActionButton(
+//                onClick = { showSheet = true },
+//                modifier = Modifier
+//                    .align(Alignment.BottomEnd)
+//                    .navigationBarsPadding()
+//        ) {
+//            Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Show readings")
+//        }
+//    }
+
 
 }
