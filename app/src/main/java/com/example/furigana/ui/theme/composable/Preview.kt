@@ -4,8 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.graphics.Point
-import android.graphics.Rect
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.compose.CameraXViewfinder
@@ -20,12 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.toComposeRect
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
@@ -35,7 +28,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.furigana.ui.theme.viewmodel.ImageToResultViewModel
-import androidx.core.graphics.createBitmap
 
 @Composable
 fun Greeting(
@@ -47,28 +39,15 @@ fun Greeting(
     // Preview shows the camera be4 taking
     // preview is just a canvas, need sth to paint on it
     // need check if permission aren't granted
-    // Camera Controller
-    // ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
     val context = LocalContext.current
-    val config = LocalConfiguration.current
     val windowInfo = LocalWindowInfo.current
-    viewModel.imageAnalyzer.clearAnalyzer()
 
-    //TODO: put code below into viewModel
-//    var box: Array<out Point?>? = Array<Point>(4) { Point() }
-    val box = remember { mutableStateOf(Array<Point>(4) { Point() }) }
-    val rect = remember { mutableStateOf(Rect().toComposeRect()) }
-    // TODO: end of code
     val surfaceRequest by viewModel.surfaceRequest.collectAsStateWithLifecycle()
-    var bitMapInMemory = remember { mutableStateOf(createBitmap(100, 100)) }
-    var taken = remember { mutableStateOf(false) }
     val cameraPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
     val permission = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { res -> println(res) }
     )
-    val isProcessing = viewModel.isProcessing.collectAsState()
-    val pathState = viewModel.path.collectAsState()
 
 //    DisposableEffect(Unit) {
 //        val orientationEventListener =

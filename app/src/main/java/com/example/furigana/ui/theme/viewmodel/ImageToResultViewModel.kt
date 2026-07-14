@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.Point
 import android.util.Size
 import androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA
-import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceOrientedMeteringPointFactory
@@ -92,11 +91,6 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
         .setResolutionSelector(resolutionSelector)
         .build()
 
-    val imageAnalyzer = ImageAnalysis.Builder()
-        .setResolutionSelector(resolutionSelector)
-        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-        .build()
-
     fun unbindCamera() {
         cameraProvider?.unbindAll()
     }
@@ -104,7 +98,7 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
     suspend fun bindToCamera(appContext: Context, lifecycleOwner: LifecycleOwner) {
         val processCameraProvider = ProcessCameraProvider.awaitInstance(appContext)
         processCameraProvider.bindToLifecycle(
-            lifecycleOwner, DEFAULT_BACK_CAMERA, imageCapture, imageAnalyzer, cameraPreviewUseCase
+            lifecycleOwner, DEFAULT_BACK_CAMERA, imageCapture, cameraPreviewUseCase
         )
         cameraProvider = processCameraProvider
         try {
