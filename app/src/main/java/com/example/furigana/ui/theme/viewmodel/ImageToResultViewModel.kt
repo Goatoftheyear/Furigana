@@ -159,8 +159,8 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                             val scaleHorizontal = screenWidth / _imageBitmap.value.width
                             val scaleVertical = screenHeight / _imageBitmap.value.height
                             var prev = Point(
-                                line.cornerPoints!![0].x,
-                                line.cornerPoints!![0].y
+                                line.cornerPoints?.get(0)?.x ?: 0,
+                                line.cornerPoints?.get(0)?.y ?: 0
                             )
                             val findLongestSide = mutableMapOf<String, Float>()
                             findLongestSide.put("x", 0.0f)
