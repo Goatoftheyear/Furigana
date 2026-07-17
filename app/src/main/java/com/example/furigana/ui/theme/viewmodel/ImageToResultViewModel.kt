@@ -144,7 +144,6 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                 val paths = mutableListOf<Path>()
                 val allTokenResults = mutableListOf<MutableMap<String, String>>()
                 for (line in ans) {
-                    val furiganaOutput: MutableMap<String, String> = mutableMapOf()
                     val lineText = line.text
                     if (europeanRegex.containsMatchIn(lineText) &&
                         !hiraganaRegex.containsMatchIn(lineText) &&
@@ -215,39 +214,7 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                             paths.add(path)
                         }
                         async(Dispatchers.Default) {
-                                val tokens = tokenizer.tokenize(lineText)
-                                for (token in tokens) {
-                                    if (token.allFeaturesArray.isEmpty()) {
-                                        continue
-                                    }
-                                    val furigana =
-                                        token.allFeaturesArray[token.allFeaturesArray.lastIndex]
-                                    if (hiraganaRegex.matches(token.surface)
-                                        || katakanaRegex.matches(token.surface)
-                                        //check for empty result
-                                        || !katakanaRegex.matches(furigana)
-                                    ) {
-                                        furiganaOutput.put(token.surface, "")
-                                        continue
-                                    }
-                                    val furiganaHiragana = furigana.map { it ->
-                                        (it.code - 0x0060).toChar()
-                                    }.joinToString("")
-                                    //Assume that all kanji with hiragana has only 1 hiragana at the end
-                                    if (hiraganaRegex.containsMatchIn(token.surface)) {
-                                        val kanjiOnly: String = token.surface.dropLast(1)
-                                        val kanjiOnlyFurigana: String = furiganaHiragana.dropLast(1)
-                                        val finalHiraganaCharacter: String =
-                                            token.surface.last().toString()
-                                        furiganaOutput.put(kanjiOnly, kanjiOnlyFurigana)
-                                        furiganaOutput.put(finalHiraganaCharacter, "")
-                                    } else {
-                                        furiganaOutput.put(token.surface, furiganaHiragana)
-                                    }
-                                }
-
-                                allTokenResults.add(furiganaOutput)
-                            setIsProcessing(false)
+                            tokenizeLine(lineText,allTokenResults)
                             }
                     }
                     }
@@ -256,5 +223,41 @@ class ImageToResultViewModel(application: Application) : AndroidViewModel(applic
                 }
             }
             .addOnFailureListener { setIsProcessing(false) }
+    }
+    fun tokenizeLine(lineText: String, allTokenResults: MutableList<MutableMap<String, String>>) {
+        val furiganaOutput: MutableMap<String, String> = mutableMapOf()
+        val tokens = tokenizer.tokenize(lineText)
+        for (token in tokens) {
+            if (token.allFeaturesArray.isEmpty()) {
+                continue
+            }
+            val furigana =
+                token.allFeaturesArray[token.allFeaturesArray.lastIndex]
+            if (hiraganaRegex.matches(token.surface)
+                || katakanaRegex.matches(token.surface)
+                //check for empty result
+                || !katakanaRegex.matches(furigana)
+            ) {
+                furiganaOutput.put(token.surface, "")
+                continue
+            }
+            val furiganaHiragana = furigana.map { it ->
+                (it.code - 0x0060).toChar()
+            }.joinToString("")
+            //Assume that all kanji with hiragana has only 1 hiragana at the end
+            if (hiraganaRegex.containsMatchIn(token.surface)) {
+                val kanjiOnly: String = token.surface.dropLast(1)
+                val kanjiOnlyFurigana: String = furiganaHiragana.dropLast(1)
+                val finalHiraganaCharacter: String =
+                    token.surface.last().toString()
+                furiganaOutput.put(kanjiOnly, kanjiOnlyFurigana)
+                furiganaOutput.put(finalHiraganaCharacter, "")
+            } else {
+                furiganaOutput.put(token.surface, furiganaHiragana)
+            }
+        }
+
+        allTokenResults.add(furiganaOutput)
+        setIsProcessing(false)
     }
 }
